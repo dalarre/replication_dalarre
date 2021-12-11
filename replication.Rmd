@@ -1,11 +1,11 @@
 ---
-title: "Untitled"
+title: "Data Replication Assignment: Developmental stress and telomere dynamics in a genetically polymorphic species"
 output: html_document
 ---
 
-#Data Replication Assignment: Developmental stress and telomere dynamics in a genetically polymorphic species
+#### Diego Alonso Larre
 
-###Introduction
+### Introduction
 
 In this article by Grunst, AS, Grunst, ML, Gonser, RA and Tuttle, EM (2019), they studied different factors that produce different patterns of senescence (the decline in physical and reproductive performance with age) in the dimorphic white-throated sparrow (Zonotrichia albicollis), that displays a genetically determined polymorphism in both sexes (tan or white). Apart from the different genetics, the white-throated sparrow morphs also exhibit different behaviours. 
 They studied individual-level factors derived from developmental stress, focusing in telomere lenght and oxidative stress. They look at these variables are affected by growth rate, size rank, etc. taking into account the different morph-sex classes and individual identity. The objective of this was trying to see if morph–sex differences in OS or telomere length occur in the nestlings and if they can explain the different patterns of senescence during adulthood. Previous studies have mixed results about the relationship of telomere lenght and oxidative stress. The study was done in nestlings.
@@ -20,13 +20,13 @@ Growth rates were calculated using the slope of a linear regression of mass vers
 Nestling size rank was determined by ordering nestlings within broods from largest to smallest. The largest nestling received a rank of 1 and the smallest a rank equal to the brood size.
 
 
-###Statistical analysis
+### Statistical analysis
 
 In order to do this study, they performed analysis by linear mixed effect models (LMM) to analyse differences in OS and RTL according to different factors, with nest, father and mother identity as random effects. As fixed effects, they entered nestling morph–sex, the morph composition of the parental pair, brood size, clutch initiation date, time of blood sampling (excluded in the telomere model), year, growth rate, size rank and age. OS level was additionally included as a fixed effect in the model predicting RTL.
 
+</br>
 
-
-###Loading necessary packages
+#### Loading necessary packages
 
 ```{r}
 
@@ -39,8 +39,9 @@ library(gridExtra) ## To combine ggplots
 
 ```
 
+</br>
 
-###Loading the data
+#### Loading the data
 
 Now we are going to load and take a look at our data
 
@@ -85,7 +86,7 @@ The results are again slightly different because of the dataset differences. The
 
 
 
-###Replicating Figure 3:
+### Replicating Figure 3:
 
 The figure are two barplots and their height is the mean of oxidative stress or relative telomere length of each type of morph-sex. The first problem is how to divide the dataset into the different morph-sex types. I found you can do this with the split function:
 
@@ -138,7 +139,6 @@ Now that we have the data, lets do the graphs. For that, I use ggplot2 and the g
 
 ```{r}
 p <- ggplot(data = df, aes(x=type, y=OSmean)) + geom_bar(stat="identity", width = 0.3) + geom_errorbar(aes(x=type, ymin = morphsex_OSmeans-morphsex_OSse, ymax = morphsex_OSmeans+morphsex_OSse), width = 0.05 ) + xlab("Morph/sex") + ylab("Oxidative stress") + annotate("text", x = 0.65, y = 4.25, label = "(a)", size = 6) + theme_bw()
-p
 
 ## The heights are the means and the error bars are the standard errors as it is described in the figure
 
@@ -148,16 +148,18 @@ q <- ggplot(data = df, aes(x=type, y=RTLmean)) + geom_bar(stat="identity", width
 grid.arrange(p, q, nrow = 1)
 
 ```
+</br>
+
 Let's compare it now with the original figure:
 
 </br>
 
-<img src="img/figure3.png" width="500px"/>
+<img src="img/figure3.png" width="800px"/>
 
 
-The barplots are similar but no exactly the same. I believe this is because some points they used were removed from the published dataset, as the sample sizes they metion aren't the same as the ones in the dataset, so some data is missing.
+The barplots are similar but not exactly the same. I believe this is because some points they used were removed from the published dataset, as the sample sizes they metion aren't the same as the ones in the dataset, so some data is missing.
 
-###Replicating table 2
+### Replicating table 2
 
 This analysis requires a mixed effects model. In this table, they predict RLT from OS and growth rate with year (2014 or 2015) as a fixed effect. Nest ID, Father ID and Mother ID are the random effects. The problem is I don't know which of the variables in the dataset is the Nest ID or if it is even included in the dataset, so I'm going to ignore that random effect.
 
@@ -202,8 +204,9 @@ n
 
 Now, let's compare with the original Table 2:
 
-<img src="img/figure3.png" width="500px"/>
+<center> <img src="img/table2.png" width="600px"/> </center>
 
+</br>
 We can see some differences between the 2 of them. In mine some data are missing because I dodn't know how to calculate it. The "Intercept" row has also really different values and I don't know the reason of this huge difference. However, the "OS", "Father ID" and "Residual" rows are very similar to the original table. "Growth rate" has a different coefficient but a similar t value. The "Mother ID" values are higher than the originals.
 
 
