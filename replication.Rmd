@@ -30,11 +30,11 @@ In order to do this study, they performed analysis by linear mixed effect models
 
 ```{r}
 
-library(lme4)
-library(curl)
-library(sciplot)
-library(ggplot2)
-library(gridExtra)
+library(lme4) ## For mixed effects models
+library(curl) ## To load the data
+library(sciplot) ## To calculate the standard error
+library(ggplot2) ## To make nice plots
+library(gridExtra) ## To combine ggplots
 ## In the paper they state that they have used the package lme4 for this analysis.
 
 ```
@@ -152,25 +152,65 @@ Let's compare it now with the original figure:
 
 </br>
 
-<img src="figure3.png" width="500px"/>
+<img src="img/figure3.png" width="500px"/>
 
+
+The barplots are similar but no exactly the same. I believe this is because some points they used were removed from the published dataset, as the sample sizes they metion aren't the same as the ones in the dataset, so some data is missing.
 
 ###Replicating table 2
 
-```{r}
-
-growthrate <- d$Growth.rate..g/d$Growth.rate.mm
-
-
-```
+This analysis requires a mixed effects model. In this table, they predict RLT from OS and growth rate with year (2014 or 2015) as a fixed effect. Nest ID, Father ID and Mother ID are the random effects. The problem is I don't know which of the variables in the dataset is the Nest ID or if it is even included in the dataset, so I'm going to ignore that random effect.
 
 ```{r}
 
-barplot(height = morphsex_means)
+growthrate <- d$Growth.rate..g/d$Growth.rate.mm ## Growth rate is calculated as g/mm
+e <- cbind(d,growthrate) ## Create a new data frame with the calculated growth rate. 
 
-lmer(data = d, d$OS ~ d$RTL.average + d$Type + d$PairType + d$BroodSize + d$Year + d$NestlingAge + d$Size.Rank + growthrate + (1|d$FatherBand) + (1|d$MotherBand))
+
+model1 <- lmer(data = e, RTL.average ~ OS + growthrate + Year + (1|FatherBand) + (1|MotherBand)) 
+
+model2 <- lmer(data = e, RTL.average ~ OS + growthrate + Year + (1 + OS|FatherBand) + (1 + OS|MotherBand) + (1 + growthrate|FatherBand) + (1 + growthrate|MotherBand))
+
+summary(model1)
+summary(model2)
 
 ```
+I did 2 models because I didn't know if the random effects affected just the intercept or also the slope, but it seems like the model1 (only intercepts) fits better the data presented in the table in the paper. 
+
+In the summary of the model we have the necessary data to complete the Table 2.
+
+However, I don't know why I am obtaining such a high value of RTL.average intercept. RTL values are around 1, and in the paper's table the intercept is 1.96. I don't know what is the error that is causing mine to get to 668. I also don't know how to find out the degrees of freedom (second column of Table 2), and because I don't know how to obtain the df, I can't calculate the p-values because I need to set a number of df to run the pt function to test if the t-value is significant.
+
+I am going to build the table with the data that I am able to obtain, so some columns are going to be missing:
+
+
+```{r}
+## I create 2 separate tables because it is the easiest way
+
+m <- matrix(c("668.99 ± 121.94", "-0.02 ± 0.01", "-0.60 ± 0.24", "-0.33 ± 0.06", 5.48, -2.15, -2.45, -5.46), ncol = 2, byrow = FALSE)
+colnames(m) <- c("β ± SE", "T")
+rownames(m) <- c("Intercept", "OS", "Growth rate (g/day)", "Year (factor)")
+
+n <- matrix(c(0.06, 0.002, 0.07, 0.25, 0.04, 0.27, 46, 46, 198), ncol = 3, byrow = FALSE)
+colnames(n) <- c("Variance", "SD", "N")
+rownames(n) <- c("Father ID", "Mother ID", "Residual")
+
+m
+n
+
+```
+
+Now, let's compare with the original Table 2:
+
+<img src="img/figure3.png" width="500px"/>
+
+We can see some differences between the 2 of them. In mine some data are missing because I dodn't know how to calculate it. The "Intercept" row has also really different values and I don't know the reason of this huge difference. However, the "OS", "Father ID" and "Residual" rows are very similar to the original table. "Growth rate" has a different coefficient but a similar t value. The "Mother ID" values are higher than the originals.
+
+
+
+
+
+
 
 
 
